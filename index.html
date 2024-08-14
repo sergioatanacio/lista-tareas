@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Lista de Tareas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 max-w-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Mi Lista de Tareas</h1>
+        
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <input type="text" id="taskInput" placeholder="Nueva tarea" 
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="flex items-center justify-between">
+                <button onclick="addTask()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Agregar Tarea
+                </button>
+            </div>
+        </div>
+
+        <ul id="taskList" class="bg-white shadow-md rounded px-8 pt-6 pb-8"></ul>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            
+            if (taskInput.value.trim() !== '') {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between border-b py-2';
+                li.innerHTML = `
+                    <span class="flex-grow">${taskInput.value}</span>
+                    <div class="flex items-center">
+                        <button onclick="copyTask(this)" class="text-blue-500 hover:text-blue-700 mr-2" title="Copiar tarea">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="confirmDelete(this)" class="text-red-500 hover:text-red-700" title="Eliminar tarea">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                taskList.appendChild(li);
+                taskInput.value = '';
+            }
+        }
+
+        function confirmDelete(button) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+                button.closest('li').remove();
+            }
+        }
+
+        function copyTask(button) {
+            const taskText = button.closest('li').querySelector('span').innerText;
+            navigator.clipboard.writeText(taskText).then(() => {
+                showNotification(taskText);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            notification.textContent = `Copiado: "${text}"`;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000); // La notificación desaparece después de 2 segundos
+        }
+
+        // Agregar tarea al presionar Enter
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+    </script>
+</body>
+</html>
